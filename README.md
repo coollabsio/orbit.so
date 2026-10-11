@@ -28,8 +28,3 @@ bun install
 bun run dev      # http://localhost:4321
 bun run build    # static site in dist/
 ```
-
-## Notes
-
-- The app screenshots in `public/images/screenshots/` (also used in this README) were captured from the Orbit web app with demo data (1600x1000 @2x, resized to 2400px WebP).
-- `Dockerfile` and `nginx.conf` build and serve the static site.
