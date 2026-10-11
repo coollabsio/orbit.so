@@ -20,11 +20,3 @@ Built with Astro, Tailwind CSS v4 and [Reicon](https://www.npmjs.com/package/rei
     <td width="50%"><img src="public/images/screenshots/home.webp" alt="Orbit: Home"><br><sub>Home</sub></td>
   </tr>
 </table>
-
-## Development
-
-```bash
-bun install
-bun run dev      # http://localhost:4321
-bun run build    # static site in dist/
-```
