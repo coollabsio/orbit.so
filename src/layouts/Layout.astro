@@ -1,0 +1,98 @@
+---
+import "../styles/global.css";
+import Navigation from "../components/Navigation.astro";
+import Footer from "../components/Footer.astro";
+
+export interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = "Orbit is a self-hosted workspace for teams. Tasks, docs, chat and mail in one app, on your own server.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta name="description" content={description} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@heyandras" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={new URL(Astro.url.pathname.replace(/(index)?\.html$/, ""), Astro.site).href} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:site_name" content="Orbit" />
+    <title>{title}</title>
+    <link rel="sitemap" href="/sitemap-index.xml" />
+  </head>
+  <body class="flex min-h-screen flex-col overflow-x-hidden font-sans leading-relaxed text-fg antialiased">
+    <Navigation />
+    <main class="mx-auto w-full max-w-6xl flex-1">
+      <div class="pt-12 text-center md:pt-20">
+        <slot />
+      </div>
+    </main>
+    <Footer />
+    <style is:global>
+      @reference "../styles/global.css";
+
+      html {
+        background-color: var(--color-app);
+        color: var(--color-fg);
+        color-scheme: dark;
+        overflow-x: hidden;
+        scroll-behavior: smooth;
+      }
+      @supports (overflow-x: clip) {
+        html,
+        body {
+          overflow-x: clip;
+        }
+      }
+      /* Pink glow at the top, the Orbit take on the coolLabs purple glow. */
+      body {
+        background:
+          radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--color-orbit) 12%, transparent), transparent 36rem),
+          var(--color-app);
+      }
+      ::selection {
+        background: color-mix(in oklch, var(--color-orbit) 45%, transparent);
+      }
+      .navbar-link {
+        @apply flex h-8 items-center gap-2 rounded-md px-2.5 text-sm text-fg-dim transition-colors hover:bg-white/[0.06] hover:text-fg;
+      }
+      @media (max-width: 639px) {
+        .navbar-link {
+          @apply h-9 w-full px-3 text-left;
+        }
+      }
+    </style>
+
+    <script>
+      const mobileMenuButton = document.getElementById("mobile-menu-button");
+      const mobileMenu = document.getElementById("mobile-menu");
+
+      mobileMenuButton?.addEventListener("click", () => {
+        mobileMenu?.classList.toggle("hidden");
+        mobileMenu?.classList.toggle("flex");
+      });
+
+      mobileMenu?.querySelectorAll("a").forEach((link) => {
+        link.addEventListener("click", () => {
+          mobileMenu?.classList.add("hidden");
+          mobileMenu?.classList.remove("flex");
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,461 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Icon from "../components/Icon.astro";
+import ScreenshotGallery from "../components/ScreenshotGallery.astro";
+import { screenshots, indexOf } from "../data/screenshots.js";
+import { github } from "../data/links.js";
+import ArrowRight from "reicon/icons/ArrowRight";
+import BranchUp from "reicon/icons/BranchUp";
+import ChatRound from "reicon/icons/ChatRound";
+import Cloud from "reicon/icons/Cloud";
+import Code from "reicon/icons/Code";
+import Command from "reicon/icons/Command";
+import DocumentText from "reicon/icons/DocumentText";
+import Download from "reicon/icons/Download";
+import Envelope from "reicon/icons/Envelope";
+import HardDrive from "reicon/icons/HardDrive";
+import History from "reicon/icons/History";
+import Inbox from "reicon/icons/Inbox";
+import Kanban from "reicon/icons/Kanban";
+import Key from "reicon/icons/Key";
+import ListCheck from "reicon/icons/ListCheck";
+import LockOpen from "reicon/icons/LockOpen";
+import MagicStar from "reicon/icons/MagicStar";
+import Maximize from "reicon/icons/Maximize";
+import Package from "reicon/icons/Package";
+import Roadmap from "reicon/icons/Roadmap";
+import Star from "reicon/icons/Star";
+import TaskSquare from "reicon/icons/TaskSquare";
+import Users from "reicon/icons/Users";
+
+const hero = screenshots[0];
+
+// what the planned assistant reads before it drafts a reply (AI section)
+const orbitKnows = [
+  { icon: DocumentText, label: "Docs and specs" },
+  { icon: Envelope, label: "Earlier emails" },
+  { icon: Kanban, label: "Tasks and releases" },
+  { icon: Code, label: "Code and pull requests" },
+  { icon: ChatRound, label: "Team chat" },
+];
+
+const areas = [
+  {
+    name: "Tasks",
+    like: "Linear and Jira",
+    icon: Kanban,
+    tagline: "Plan and track the work",
+    brand: "#f2458f",
+    brandText: "#ff8ac0",
+    description:
+      "Projects with their own workflows. Switch between list, board and roadmap, break work into sub-issues, and keep issues from GitHub in sync.",
+    points: ["List, board and roadmap", "Sub-issues and labels", "Saved views", "GitHub sync"],
+    shot: "board",
+  },
+  {
+    name: "Docs",
+    like: "Notion",
+    icon: DocumentText,
+    tagline: "Write it down, find it later",
+    brand: "#8b5cf6",
+    brandText: "#c4b5fd",
+    description:
+      "A page tree with teamspaces and favorites. The rich editor has a slash menu, tables, code blocks and checklists. Import your pages from Notion.",
+    points: ["Rich editor", "Teamspaces", "Notion import", "Search and trash"],
+    shot: "docs-page",
+  },
+  {
+    name: "Chat",
+    like: "Slack and Discord",
+    icon: ChatRound,
+    tagline: "Talk next to the work",
+    brand: "#d946ef",
+    brandText: "#f0abfc",
+    description:
+      "Channels, direct messages and threads, with files, code blocks, reactions and search. Links to tasks and pages open as previews in the conversation.",
+    points: ["Channels and DMs", "Threads", "Files", "Search"],
+    shot: "chat",
+  },
+  {
+    name: "Mail",
+    like: "Gmail and Front",
+    icon: Envelope,
+    tagline: "One inbox for the team",
+    badge: "Coming soon",
+    brand: "#fb7185",
+    brandText: "#fda4af",
+    description:
+      "A shared inbox for the team, so customer threads live next to the tasks and docs they are about. Mail is the next part of Orbit.",
+    points: ["Shared inbox", "Threads", "Inline replies"],
+    shot: "mail",
+  },
+];
+
+const features = [
+  {
+    wide: "full",
+    icon: MagicStar,
+    title: "MCP server for AI clients",
+    badge: "Coming soon",
+    html: "Connect Claude, Codex or Grok to your Orbit with built-in OAuth. You choose the workspace and projects, and your AI client reads the tasks it needs.",
+  },
+  {
+    icon: ListCheck,
+    title: "Your own workflows",
+    html: "Each project has its own statuses, grouped by category. Shape the flow to how your team works.",
+  },
+  {
+    icon: Roadmap,
+    title: "List, board and roadmap",
+    html: "Change the layout with one click. Drag tasks between statuses or along the timeline.",
+  },
+  {
+    icon: TaskSquare,
+    title: "Sub-issues and relations",
+    html: "Break big work into sub-issues, link related tasks and see every change in the activity feed.",
+  },
+  {
+    icon: Star,
+    title: "Saved views",
+    html: "Save your filters, sort order and layout as a view and come back to it at any time.",
+  },
+  {
+    icon: BranchUp,
+    title: "GitHub sync",
+    html: "One GitHub App per workspace. Add a label to an issue or pull request and Orbit makes a task. A merged pull request completes it.",
+  },
+  {
+    icon: Command,
+    title: "Command palette",
+    html: "Press <kbd class=\"rounded bg-white/[0.08] px-1 font-mono text-[11px] text-fg-dim\">Ctrl K</kbd> to find tasks, pages and actions from anywhere.",
+  },
+  {
+    icon: Inbox,
+    title: "Personal views",
+    html: "Home, Activity, My tasks, This week, Overdue and Due soon. Know what to do next without a search.",
+  },
+  {
+    icon: Download,
+    title: "Import from Notion",
+    html: "Choose the pages to import. Orbit copies the pages and their files into a teamspace.",
+  },
+  {
+    wide: "full",
+    icon: Package,
+    title: "One binary. One SQLite file.",
+    html: "A Rust server serves the API and the embedded web app from one HTTP listener. No Node, no Redis, no separate database server. Put a reverse proxy in front of it for HTTPS.",
+    code: "./orbit serve",
+  },
+  {
+    wide: "half",
+    icon: Users,
+    title: "Workspaces and roles",
+    html: "Invite members, give roles and manage sessions for each workspace.",
+  },
+  {
+    icon: Key,
+    title: "API tokens",
+    html: "Tokens with scopes and project access, also for service accounts.",
+  },
+  {
+    icon: History,
+    title: "Audit log",
+    html: "Every admin action is recorded. Export the log as CSV.",
+  },
+  {
+    wide: "half",
+    icon: LockOpen,
+    title: "No vendor lock-in",
+    html: "Your tasks, docs and messages stay on your server, in one file you can copy. Orbit is Apache 2.0 licensed.",
+  },
+  {
+    wide: "half",
+    icon: HardDrive,
+    title: "Runs on any server",
+    badge: "Coming soon",
+    html: "A small VPS, a home server or a Raspberry Pi. Images for <code class=\"font-mono text-fg-dim\">linux/amd64</code> and <code class=\"font-mono text-fg-dim\">linux/arm64</code>.",
+  },
+];
+
+---
+
+<Layout title="Orbit - Your team's work, in one orbit">
+  <section class="px-4">
+    <a
+      href="https://coollabs.io/philosophy?ref=orbit"
+      class="inline-flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-1 text-xs text-fg-dim ring-1 ring-hairline transition-colors hover:bg-white/[0.07] hover:text-fg"
+    >
+      <span class="size-1.5 rounded-full bg-orbit-light"></span>
+      Open source and free forever. Read our philosophy
+      <Icon icon={ArrowRight} class="size-3.5" />
+    </a>
+    <h1 class="mx-auto mt-6 max-w-3xl text-4xl font-semibold tracking-tight text-fg md:text-6xl">
+      <span class="block">Your team's work,</span>
+      <span class="block">in one orbit<span class="text-orbit">.</span></span>
+    </h1>
+    <p class="mx-auto mt-5 max-w-2xl text-base text-pretty text-fg-dim md:text-lg">
+      Orbit is a self-hosted workspace for teams. Tasks, docs, chat and mail in
+      one app, on your own server. Built so that your AI assistant has the full
+      context of your work.
+    </p>
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <a href={github} class="btn btn-primary btn-lg">
+        <svg class="size-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            fill-rule="evenodd"
+            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+            clip-rule="evenodd"></path>
+        </svg>
+        View on GitHub
+      </a>
+      <div class="btn btn-neutral btn-lg gap-0 overflow-hidden px-0">
+        <a href="#get-orbit" class="flex h-full items-center gap-2 pr-3 pl-5 transition-colors hover:bg-white/[0.05]">
+          <Icon icon={Cloud} class="size-4" />
+          Cloud
+          <span class="rounded-full bg-orbit/15 px-1.5 py-px text-[10px] font-semibold tracking-wider text-orbit-light uppercase">Soon</span>
+        </a>
+        <span class="h-5 w-px bg-white/15" aria-hidden="true"></span>
+        <a href="#get-orbit" class="flex h-full items-center gap-2 pr-5 pl-3 transition-colors hover:bg-white/[0.05]">
+          <Icon icon={HardDrive} class="size-4" />
+          Self-hosting
+          <span class="rounded-full bg-orbit/15 px-1.5 py-px text-[10px] font-semibold tracking-wider text-orbit-light uppercase">Soon</span>
+        </a>
+      </div>
+    </div>
+    <div class="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-fg-faint">
+      <span>One binary</span>
+      <span aria-hidden="true">·</span>
+      <span>One SQLite file</span>
+      <span aria-hidden="true">·</span>
+      <span>Apache 2.0</span>
+      <span aria-hidden="true">·</span>
+      <span>Made by <a class="text-fg-dim underline decoration-fg-faint underline-offset-2 transition-colors hover:text-fg" href="https://coollabs.io?ref=orbit">coolLabs</a></span>
+    </div>
+  </section>
+
+  <section class="mt-14 px-4" aria-label="Orbit screenshots">
+    <div class="relative">
+      <div class="pointer-events-none absolute inset-x-10 -top-10 h-40 bg-[radial-gradient(closest-side,var(--color-orbit),transparent)] opacity-25 blur-3xl"></div>
+      <button
+        type="button"
+        data-gallery-open="0"
+        class="group relative block w-full cursor-zoom-in rounded-xl bg-white/[0.03] p-1.5 ring-1 ring-hairline transition-colors hover:ring-orbit/40 focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-orbit-light"
+      >
+        <img src={hero.src} alt={hero.alt} width="2400" height="1500" fetchpriority="high" class="w-full rounded-lg" />
+        <span class="absolute right-4 bottom-4 inline-flex items-center gap-1.5 rounded-full bg-app/80 px-3 py-1.5 text-xs font-medium text-fg ring-1 ring-hairline backdrop-blur transition-colors group-hover:bg-app">
+          <Icon icon={Maximize} class="size-3.5" />
+          View all {screenshots.length} screenshots
+        </span>
+      </button>
+    </div>
+    <p class="mt-3 text-[13px] text-fg-faint">
+      <span class="text-fg-dim">{hero.area}: {hero.title}.</span> {hero.text}
+    </p>
+  </section>
+
+  <section id="workspace" class="mt-28 scroll-mt-20 px-4">
+    <p class="eyebrow">Workspace</p>
+    <h2 class="mt-2 text-2xl font-semibold tracking-tight text-fg md:text-3xl">
+      Stop switching between five apps
+    </h2>
+    <p class="mx-auto mt-3 max-w-xl text-sm text-fg-faint">
+      Tasks like Linear, docs like Notion, chat like Slack and Discord, and mail
+      like Gmail. One sidebar, one search and one set of members.
+    </p>
+
+    <div class="mt-10 grid gap-4 text-left lg:grid-cols-2">
+      {
+        areas.map((area) => (
+          <article
+            class="relative flex flex-col overflow-hidden rounded-xl bg-white/[0.03] p-5 ring-1 ring-(--brand)/35"
+            style={`--brand: ${area.brand}; --brand-text: ${area.brandText};`}
+          >
+            <div class="pointer-events-none absolute inset-x-0 -top-32 h-56 bg-[radial-gradient(closest-side,var(--brand),transparent)] opacity-30 blur-2xl" />
+            <div class="relative flex items-start gap-4">
+              <div class="flex size-11 shrink-0 items-center justify-center rounded-lg bg-(--brand)/15 ring-1 ring-(--brand)/40">
+                <Icon icon={area.icon} class="size-5 text-(--brand-text)" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="flex items-center gap-2 text-lg leading-tight font-semibold tracking-tight text-fg">
+                  {area.name}
+                  {area.badge && (
+                    <span class="rounded-full bg-(--brand)/15 px-1.5 py-px text-[10px] font-semibold tracking-wider text-(--brand-text) uppercase">
+                      {area.badge}
+                    </span>
+                  )}
+                </h3>
+                <p class="mt-0.5 text-sm font-medium text-(--brand-text)">{area.tagline}</p>
+              </div>
+              <span class="hidden shrink-0 rounded-full bg-white/[0.04] px-2.5 py-1 text-xs text-fg-dim ring-1 ring-hairline sm:inline-block">
+                Like {area.like}
+              </span>
+            </div>
+            <p class="relative mt-4 text-sm text-fg-dim">{area.description}</p>
+            <div class="relative mt-4 flex flex-wrap gap-x-5 gap-y-1 text-xs text-fg-faint">
+              {area.points.map((point) => (
+                <span class="inline-flex items-center gap-1.5">
+                  <span class="size-1 rounded-full bg-(--brand-text)" />
+                  {point}
+                </span>
+              ))}
+            </div>
+            <button
+              type="button"
+              data-gallery-open={indexOf(area.shot)}
+              class="group relative mt-5 block w-full cursor-zoom-in rounded-lg bg-white/[0.03] p-1 ring-1 ring-hairline transition-shadow hover:ring-(--brand)/60 focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-orbit-light"
+            >
+              <img
+                src={screenshots[indexOf(area.shot)].src}
+                alt={screenshots[indexOf(area.shot)].alt}
+                width="2400"
+                height="1500"
+                loading="lazy"
+                class="w-full rounded-md"
+              />
+              <span class="absolute right-3 bottom-3 inline-flex items-center gap-1.5 rounded-full bg-app/80 px-3 py-1.5 text-xs font-medium text-fg ring-1 ring-hairline backdrop-blur transition-colors group-hover:bg-app">
+                <Icon icon={Maximize} class="size-3.5" />
+                {screenshots.filter((s) => s.area === area.name).length} screenshots
+              </span>
+            </button>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section id="ai" class="mt-28 scroll-mt-20 px-4">
+    <p class="eyebrow">AI</p>
+    <h2 class="mt-2 text-2xl font-semibold tracking-tight text-fg md:text-3xl">
+      Context is the whole point
+    </h2>
+    <p class="mx-auto mt-3 max-w-xl text-sm text-fg-faint">
+      An AI assistant is only as good as what it can see. Orbit keeps tasks,
+      docs and conversations in one place, so an assistant can see all of it.
+    </p>
+
+    <div class="mt-10 grid items-stretch gap-4 text-left lg:grid-cols-5">
+      <div class="card flex flex-col p-5 lg:col-span-2">
+        <div class="flex size-8 items-center justify-center rounded-md bg-orbit/15 ring-1 ring-orbit/40">
+          <Icon icon={MagicStar} class="size-4 text-orbit-light" />
+        </div>
+        <h3 class="mt-4 flex items-center gap-2 text-base font-medium text-fg">
+          Bring your own AI client
+          <span class="rounded-full bg-orbit/15 px-1.5 py-px text-[10px] font-semibold tracking-wider text-orbit-light uppercase">Coming soon</span>
+        </h3>
+        <p class="mt-2 text-[13px] leading-5 text-fg-faint">
+          An MCP server with built-in OAuth. Sign in, choose a workspace and
+          projects, and allow access. Your AI client can then read your projects
+          and tasks.
+        </p>
+        <h3 class="mt-6 text-base font-medium text-fg">A built-in assistant next</h3>
+        <p class="mt-2 text-[13px] leading-5 text-fg-faint">
+          An assistant inside Orbit that knows every part of your workspace.
+          When an email comes in, it reads the docs, earlier emails, tasks, code
+          and chat about it, and writes a precise draft reply for you.
+        </p>
+      </div>
+      <div class="relative flex flex-col overflow-hidden rounded-lg bg-white/[0.03] p-5 ring-1 ring-orbit/35 lg:col-span-3">
+        <div class="pointer-events-none absolute inset-x-0 -top-32 h-56 bg-[radial-gradient(closest-side,var(--color-orbit),transparent)] opacity-25 blur-2xl"></div>
+        <div class="relative flex items-center justify-between gap-3">
+          <p class="eyebrow">One example: an email comes in</p>
+          <span class="rounded-full bg-orbit/15 px-1.5 py-px text-[10px] font-semibold tracking-wider text-orbit-light uppercase">Coming soon</span>
+        </div>
+        <div class="relative mt-3 rounded-md bg-white/[0.03] p-3 ring-1 ring-hairline">
+          <p class="text-xs text-fg-faint"><span class="text-fg-dim">Hannah Weiss</span> · Northwind Labs, a customer</p>
+          <p class="mt-1 text-sm text-fg">"Since your update last week, our CSV exports stop at 10,000 rows. Is this a known problem? We need the full export for our month-end close on Friday."</p>
+        </div>
+        <p class="relative mt-5 eyebrow">Orbit already knows</p>
+        <div class="relative mt-2 flex flex-wrap gap-1.5">
+          {orbitKnows.map((item) => (
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-white/[0.04] px-2.5 py-0.5 text-xs text-fg-dim ring-1 ring-hairline">
+              <Icon icon={item.icon} class="size-3.5 text-orbit-light" />
+              {item.label}
+            </span>
+          ))}
+        </div>
+        <p class="relative mt-5 font-mono text-xs text-orbit-light">draft reply, ready to send</p>
+        <div class="relative mt-2 rounded-md bg-orbit/[0.06] p-3 text-sm text-fg-dim ring-1 ring-orbit/30">
+          Hi Hannah, yes, this is a known bug from last week's 2.4 release
+          (TASK-128). The fix is merged in PR #412 and ships in 2.4.1 on Thursday,
+          before your Friday close. Until then, export by date range, as our export
+          guide shows. Your UTF-8 setting from March stays as it is.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="mt-28 scroll-mt-20 px-4">
+    <p class="eyebrow">Features</p>
+    <h2 class="mt-2 text-2xl font-semibold tracking-tight text-fg md:text-3xl">
+      Everything your team needs, nothing it does not
+    </h2>
+    <p class="mx-auto mt-3 max-w-xl text-sm text-fg-faint">
+      Made for small teams that want one fast, calm place for their work.
+    </p>
+    <div class="mt-10 grid gap-3 text-left sm:grid-cols-2 lg:grid-cols-4">
+      {
+        features.map((feature) =>
+          feature.wide ? (
+            <div class={`card flex flex-col gap-4 p-4 sm:col-span-2 md:flex-row md:items-center ${feature.wide === "full" ? "lg:col-span-4" : "lg:col-span-2"}`}>
+              <div class="flex size-8 shrink-0 items-center justify-center rounded-md bg-white/[0.06] ring-1 ring-hairline">
+                <Icon icon={feature.icon} class="size-4 text-orbit-light" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <h3 class="flex items-center gap-2 text-sm font-medium text-fg">
+                  {feature.title}
+                  {feature.badge && <span class="rounded-full bg-orbit/15 px-1.5 py-px text-[10px] font-semibold tracking-wider text-orbit-light uppercase">{feature.badge}</span>}
+                </h3>
+                <p class="mt-1 text-[13px] leading-5 text-fg-faint" set:html={feature.html} />
+              </div>
+              {feature.code && (
+                <code class="shrink-0 self-start rounded-md bg-white/[0.04] px-3 py-1.5 font-mono text-xs text-fg-dim ring-1 ring-hairline md:self-center">{feature.code}</code>
+              )}
+            </div>
+          ) : (
+            <div class="card p-4">
+              <div class="flex size-8 items-center justify-center rounded-md bg-white/[0.06] ring-1 ring-hairline">
+                <Icon icon={feature.icon} class="size-4 text-orbit-light" />
+              </div>
+              <h3 class="mt-3 text-sm font-medium text-fg">{feature.title}</h3>
+              <p class="mt-1 text-[13px] leading-5 text-fg-faint" set:html={feature.html} />
+            </div>
+          )
+        )
+      }
+    </div>
+  </section>
+
+  <section id="get-orbit" class="mt-28 scroll-mt-20 px-4">
+    <p class="eyebrow">Get Orbit</p>
+    <h2 class="mt-2 text-2xl font-semibold tracking-tight text-fg md:text-3xl">
+      Cloud or your own server
+    </h2>
+    <p class="mx-auto mt-3 max-w-xl text-sm text-fg-faint">
+      Orbit is not ready for your team yet. Star the repository to follow the work.
+    </p>
+    <div class="mx-auto mt-10 grid max-w-4xl gap-4 text-left md:grid-cols-2">
+        <div class="card flex flex-col items-start p-5">
+          <div class="flex w-full items-center gap-3">
+            <div class="flex size-9 items-center justify-center rounded-md bg-orbit/15 ring-1 ring-orbit/40">
+              <Icon icon={Cloud} class="size-4 text-orbit-light" />
+            </div>
+            <h3 class="text-base font-medium text-fg">Orbit Cloud</h3>
+            <span class="ml-auto rounded-full bg-orbit/15 px-1.5 py-px text-[10px] font-semibold tracking-wider text-orbit-light uppercase">Coming soon</span>
+          </div>
+          <p class="mt-3 text-[13px] leading-5 text-fg-faint">We run Orbit for you. Sign up, invite your team and start working. No server to manage.</p>
+        </div>
+        <div class="card flex flex-col items-start p-5">
+          <div class="flex w-full items-center gap-3">
+            <div class="flex size-9 items-center justify-center rounded-md bg-orbit/15 ring-1 ring-orbit/40">
+              <Icon icon={HardDrive} class="size-4 text-orbit-light" />
+            </div>
+            <h3 class="text-base font-medium text-fg">Self-hosting</h3>
+            <span class="ml-auto rounded-full bg-orbit/15 px-1.5 py-px text-[10px] font-semibold tracking-wider text-orbit-light uppercase">Coming soon</span>
+          </div>
+          <p class="mt-3 text-[13px] leading-5 text-fg-faint">Run Orbit on your own server: one binary, one SQLite file, and your data never leaves it.</p>
+        </div>
+    </div>
+  </section>
+
+  <ScreenshotGallery />
+</Layout>
