@@ -1,8 +1,17 @@
 # orbit.so
 
+![Orbit landing page](.github/screenshots/hero.webp)
+
 Landing page for [Orbit](https://github.com/coollabsio/orbit), the self-hosted workspace for teams by coolLabs.
 
 Built with Astro, Tailwind CSS v4 and [Reicon](https://www.npmjs.com/package/reicon) icons, in the same style as coolify.io and coollabs.io, with a pink theme.
+
+<details>
+<summary>Full page</summary>
+
+![Orbit landing page, full page](.github/screenshots/full.webp)
+
+</details>
 
 ## Development
 
