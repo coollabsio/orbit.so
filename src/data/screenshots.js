@@ -11,7 +11,7 @@ export const screenshots = [
   shot("board", "Tasks", "Board", "Drag tasks between the statuses of your own workflow, across every project."),
   shot("list", "Tasks", "List", "All tasks grouped by status, with labels, projects, due dates and assignees."),
   shot("roadmap", "Tasks", "Timeline", "Zoom by week, month or quarter, and drag tasks along the timeline to schedule them."),
-  shot("detail", "Tasks", "Task detail", "Description, checklists, properties, relations, activity and comments with replies."),
+  shot("detail", "Tasks", "Task detail", "A rich description that the team edits together live, with checklists, properties, relations and comments."),
   shot("palette", "Tasks", "Command palette", "Press Ctrl+K to find tasks, pages and actions from anywhere."),
   shot("home", "Home", "Home", "Your tasks due this week, unread notifications and recently updated docs."),
   shot("docs-page", "Docs", "Pages", "A page tree with teamspaces, favorites, covers, icons and a rich editor."),

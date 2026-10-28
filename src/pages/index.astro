@@ -3,8 +3,9 @@ import Layout from "../layouts/Layout.astro";
 import Icon from "../components/Icon.astro";
 import ScreenshotGallery from "../components/ScreenshotGallery.astro";
 import { screenshots, indexOf } from "../data/screenshots.js";
-import { github } from "../data/links.js";
+import { cloud, github } from "../data/links.js";
 import ArrowRight from "reicon/icons/ArrowRight";
+import ArrowUpRight from "reicon/icons/ArrowUpRight";
 import BranchUp from "reicon/icons/BranchUp";
 import ChatRound from "reicon/icons/ChatRound";
 import Cloud from "reicon/icons/Cloud";
@@ -12,6 +13,7 @@ import Code from "reicon/icons/Code";
 import Command from "reicon/icons/Command";
 import DocumentText from "reicon/icons/DocumentText";
 import Download from "reicon/icons/Download";
+import Edit from "reicon/icons/Edit";
 import Envelope from "reicon/icons/Envelope";
 import HardDrive from "reicon/icons/HardDrive";
 import History from "reicon/icons/History";
@@ -21,6 +23,7 @@ import Key from "reicon/icons/Key";
 import ListCheck from "reicon/icons/ListCheck";
 import LockOpen from "reicon/icons/LockOpen";
 import MagicStar from "reicon/icons/MagicStar";
+import Mobile from "reicon/icons/Mobile";
 import Maximize from "reicon/icons/Maximize";
 import Package from "reicon/icons/Package";
 import Roadmap from "reicon/icons/Roadmap";
@@ -48,8 +51,8 @@ const areas = [
     brand: "#f2458f",
     brandText: "#ff8ac0",
     description:
-      "Projects with their own workflows. Switch between list, board and roadmap, break work into sub-issues, and keep issues from GitHub in sync.",
-    points: ["List, board and roadmap", "Sub-issues and labels", "Saved views", "GitHub sync"],
+      "Projects with their own workflows. Switch between list, board and timeline, write rich descriptions together, break work into sub-issues, and keep issues from GitHub in sync.",
+    points: ["List, board and timeline", "Sub-issues and labels", "Live co-editing", "GitHub sync"],
     shot: "board",
   },
   {
@@ -60,8 +63,8 @@ const areas = [
     brand: "#8b5cf6",
     brandText: "#c4b5fd",
     description:
-      "A page tree with teamspaces and favorites. The rich editor has a slash menu, tables, code blocks and checklists. Import your pages from Notion.",
-    points: ["Rich editor", "Teamspaces", "Notion import", "Search and trash"],
+      "A page tree with teamspaces and favorites. Write together in real time in a rich editor with tables, code blocks and checklists. Import your pages from Notion.",
+    points: ["Rich editor", "Live co-editing", "Page history", "Notion import"],
     shot: "docs-page",
   },
   {
@@ -106,7 +109,7 @@ const features = [
   },
   {
     icon: Roadmap,
-    title: "List, board and roadmap",
+    title: "List, board and timeline",
     html: "Change the layout with one click. Drag tasks between statuses or along the timeline.",
   },
   {
@@ -141,9 +144,15 @@ const features = [
   },
   {
     wide: "full",
+    icon: Edit,
+    title: "Live co-editing",
+    html: "Edit docs, task descriptions and comments together in real time. Each person gets their own cursor color, and you see who is on the page.",
+  },
+  {
+    wide: "full",
     icon: Package,
-    title: "One binary. One SQLite file.",
-    html: "A Rust server serves the API and the embedded web app from one HTTP listener. No Node, no Redis, no separate database server. Put a reverse proxy in front of it for HTTPS.",
+    title: "One binary. SQLite or Postgres.",
+    html: "A Rust server serves the API and the embedded web app from one HTTP listener. Start with one SQLite file, or let several servers share one Postgres database.",
     code: "./orbit serve",
   },
   {
@@ -166,13 +175,12 @@ const features = [
     wide: "half",
     icon: LockOpen,
     title: "No vendor lock-in",
-    html: "Your tasks, docs and messages stay on your server, in one file you can copy. Orbit is Apache 2.0 licensed.",
+    html: "Your tasks, docs and messages stay on your server, in your own database. Orbit is Apache 2.0 licensed.",
   },
   {
     wide: "half",
     icon: HardDrive,
     title: "Runs on any server",
-    badge: "Coming soon",
     html: "A small VPS, a home server or a Raspberry Pi. Images for <code class=\"font-mono text-fg-dim\">linux/amd64</code> and <code class=\"font-mono text-fg-dim\">linux/arm64</code>.",
   },
 ];
@@ -209,23 +217,21 @@ const features = [
         View on GitHub
       </a>
       <div class="btn btn-neutral btn-lg gap-0 overflow-hidden px-0">
-        <a href="#get-orbit" class="flex h-full items-center gap-2 pr-3 pl-5 transition-colors hover:bg-white/[0.05]">
+        <a href={cloud} class="flex h-full items-center gap-2 pr-3 pl-5 transition-colors hover:bg-white/[0.05]">
           <Icon icon={Cloud} class="size-4" />
           Cloud
-          <span class="rounded-full bg-orbit/15 px-1.5 py-px text-[10px] font-semibold tracking-wider text-orbit-light uppercase">Soon</span>
         </a>
         <span class="h-5 w-px bg-white/15" aria-hidden="true"></span>
-        <a href="#get-orbit" class="flex h-full items-center gap-2 pr-5 pl-3 transition-colors hover:bg-white/[0.05]">
+        <a href={github} class="flex h-full items-center gap-2 pr-5 pl-3 transition-colors hover:bg-white/[0.05]">
           <Icon icon={HardDrive} class="size-4" />
           Self-hosting
-          <span class="rounded-full bg-orbit/15 px-1.5 py-px text-[10px] font-semibold tracking-wider text-orbit-light uppercase">Soon</span>
         </a>
       </div>
     </div>
     <div class="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-fg-faint">
       <span>One binary</span>
       <span aria-hidden="true">·</span>
-      <span>One SQLite file</span>
+      <span>SQLite or Postgres</span>
       <span aria-hidden="true">·</span>
       <span>Apache 2.0</span>
       <span aria-hidden="true">·</span>
@@ -331,6 +337,7 @@ const features = [
     <p class="mx-auto mt-3 max-w-xl text-sm text-fg-faint">
       An AI assistant is only as good as what it can see. Orbit keeps tasks,
       docs and conversations in one place, so an assistant can see all of it.
+      And because Orbit runs on your server, that context stays with you.
     </p>
 
     <div class="mt-10 grid items-stretch gap-4 text-left lg:grid-cols-5">
@@ -428,21 +435,23 @@ const features = [
   <section id="get-orbit" class="mt-28 scroll-mt-20 px-4">
     <p class="eyebrow">Get Orbit</p>
     <h2 class="mt-2 text-2xl font-semibold tracking-tight text-fg md:text-3xl">
-      Cloud or your own server
+      Cloud, your own server, or your phone
     </h2>
     <p class="mx-auto mt-3 max-w-xl text-sm text-fg-faint">
-      Orbit is not ready for your team yet. Star the repository to follow the work.
+      Start on Orbit Cloud today, or run Orbit on your own server. The mobile app comes soon.
     </p>
-    <div class="mx-auto mt-10 grid max-w-4xl gap-4 text-left md:grid-cols-2">
+    <div class="mt-10 grid gap-4 text-left md:grid-cols-3">
         <div class="card flex flex-col items-start p-5">
           <div class="flex w-full items-center gap-3">
             <div class="flex size-9 items-center justify-center rounded-md bg-orbit/15 ring-1 ring-orbit/40">
               <Icon icon={Cloud} class="size-4 text-orbit-light" />
             </div>
             <h3 class="text-base font-medium text-fg">Orbit Cloud</h3>
-            <span class="ml-auto rounded-full bg-orbit/15 px-1.5 py-px text-[10px] font-semibold tracking-wider text-orbit-light uppercase">Coming soon</span>
           </div>
           <p class="mt-3 text-[13px] leading-5 text-fg-faint">We run Orbit for you. Sign up, invite your team and start working. No server to manage.</p>
+          <a href={cloud} class="mt-auto inline-flex items-center gap-1 pt-4 text-xs font-medium text-orbit-light transition-colors hover:text-fg">
+            Open app.orbit.so <Icon icon={ArrowUpRight} class="size-3.5" />
+          </a>
         </div>
         <div class="card flex flex-col items-start p-5">
           <div class="flex w-full items-center gap-3">
@@ -450,9 +459,21 @@ const features = [
               <Icon icon={HardDrive} class="size-4 text-orbit-light" />
             </div>
             <h3 class="text-base font-medium text-fg">Self-hosting</h3>
+          </div>
+          <p class="mt-3 text-[13px] leading-5 text-fg-faint">Run Orbit on your own server: one binary, SQLite or Postgres, and your data never leaves it.</p>
+          <a href={github} class="mt-auto inline-flex items-center gap-1 pt-4 text-xs font-medium text-orbit-light transition-colors hover:text-fg">
+            Install guide on GitHub <Icon icon={ArrowUpRight} class="size-3.5" />
+          </a>
+        </div>
+        <div class="card flex flex-col items-start p-5">
+          <div class="flex w-full items-center gap-3">
+            <div class="flex size-9 items-center justify-center rounded-md bg-orbit/15 ring-1 ring-orbit/40">
+              <Icon icon={Mobile} class="size-4 text-orbit-light" />
+            </div>
+            <h3 class="text-base font-medium text-fg">iOS and Android app</h3>
             <span class="ml-auto rounded-full bg-orbit/15 px-1.5 py-px text-[10px] font-semibold tracking-wider text-orbit-light uppercase">Coming soon</span>
           </div>
-          <p class="mt-3 text-[13px] leading-5 text-fg-faint">Run Orbit on your own server: one binary, one SQLite file, and your data never leaves it.</p>
+          <p class="mt-3 text-[13px] leading-5 text-fg-faint">Tasks, docs, chat and activity in a native app, with live editing of pages. Works with Cloud and your own server.</p>
         </div>
     </div>
   </section>
