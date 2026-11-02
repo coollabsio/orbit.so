@@ -1,7 +1,7 @@
 ---
 import Icon from "./Icon.astro";
 import Menu from "reicon/icons/Menu";
-import { github } from "../data/links.js";
+import { cloud, github } from "../data/links.js";
 ---
 
 <header class="sticky top-0 z-50 bg-app/30 backdrop-blur-xl">
@@ -13,9 +13,8 @@ import { github } from "../data/links.js";
     </a>
     <div class="hidden flex-1 items-center gap-0.5 sm:flex">
       <a class="navbar-link" href="/#workspace">Product</a>
-      <a class="navbar-link" href="/#ai">AI</a>
       <a class="navbar-link" href="/#features">Features</a>
-      <a class="navbar-link" href="/#get-orbit">Cloud & self-host</a>
+      <a class="navbar-link" href="/pricing">Pricing</a>
     </div>
     <div class="flex items-center gap-2">
       <a class="navbar-link hidden! sm:flex!" href={github}>
@@ -27,7 +26,7 @@ import { github } from "../data/links.js";
         </svg>
         GitHub
       </a>
-      <a class="btn btn-primary hidden sm:inline-flex" href={github}>Star on GitHub</a>
+      <a class="btn btn-primary hidden sm:inline-flex" href={cloud}>To Cloud</a>
       <button
         id="mobile-menu-button"
         type="button"
@@ -41,10 +40,9 @@ import { github } from "../data/links.js";
   </nav>
   <div id="mobile-menu" class="hidden flex-col gap-0.5 border-t border-hairline px-4 py-3 sm:hidden!">
     <a class="navbar-link" href="/#workspace">Product</a>
-    <a class="navbar-link" href="/#ai">AI</a>
     <a class="navbar-link" href="/#features">Features</a>
-    <a class="navbar-link" href="/#get-orbit">Cloud & self-host</a>
+    <a class="navbar-link" href="/pricing">Pricing</a>
     <a class="navbar-link" href={github}>GitHub</a>
-    <a class="btn btn-primary mt-2 w-full" href={github}>Star on GitHub</a>
+    <a class="btn btn-primary mt-2 w-full" href={cloud}>To Cloud</a>
   </div>
 </header>

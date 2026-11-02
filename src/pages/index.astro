@@ -4,6 +4,7 @@ import Icon from "../components/Icon.astro";
 import ScreenshotGallery from "../components/ScreenshotGallery.astro";
 import { screenshots, indexOf } from "../data/screenshots.js";
 import { cloud, github } from "../data/links.js";
+import { price, trial } from "../data/pricing.js";
 import ArrowRight from "reicon/icons/ArrowRight";
 import ArrowUpRight from "reicon/icons/ArrowUpRight";
 import BranchUp from "reicon/icons/BranchUp";
@@ -201,9 +202,8 @@ const features = [
       <span class="block">in one orbit<span class="text-orbit">.</span></span>
     </h1>
     <p class="mx-auto mt-5 max-w-2xl text-base text-pretty text-fg-dim md:text-lg">
-      Orbit is a self-hosted workspace for teams. Tasks, docs and chat in one
-      app, on your own server, with mail coming soon. Built so that your AI
-      assistant has the full context of your work.
+      The best parts of Linear, Notion, Slack and your inbox, grown into one
+      workspace for your team.
     </p>
     <div class="mt-8 flex flex-wrap justify-center gap-3">
       <a href={github} class="btn btn-primary btn-lg">
@@ -216,7 +216,7 @@ const features = [
         View on GitHub
       </a>
       <div class="btn btn-neutral btn-lg gap-0 overflow-hidden px-0">
-        <a href={cloud} class="flex h-full items-center gap-2 pr-3 pl-5 transition-colors hover:bg-white/[0.05]">
+        <a href="/pricing" class="flex h-full items-center gap-2 pr-3 pl-5 transition-colors hover:bg-white/[0.05]">
           <Icon icon={Cloud} class="size-4" />
           Cloud
         </a>
@@ -444,9 +444,12 @@ const features = [
             </div>
             <h3 class="text-base font-medium text-fg">Orbit Cloud</h3>
           </div>
-          <p class="mt-3 text-[13px] leading-5 text-fg-faint">We run Orbit for you. Sign up, invite your team and start working. No server to manage.</p>
+          <p class="mt-3 text-[13px] leading-5 text-fg-faint">We run Orbit for you. Sign up, invite your team and start working. No server to manage. ${price.monthly} per workspace each month, with a {trial.days}-day free trial.</p>
           <a href={cloud} class="mt-auto inline-flex items-center gap-1 pt-4 text-xs font-medium text-orbit-light transition-colors hover:text-fg">
             Open app.orbit.so <Icon icon={ArrowUpRight} class="size-3.5" />
+          </a>
+          <a href="/pricing" class="inline-flex items-center gap-1 pt-2 text-xs font-medium text-fg-dim transition-colors hover:text-fg">
+            See pricing <Icon icon={ArrowRight} class="size-3.5" />
           </a>
         </div>
         <div class="card flex flex-col items-start p-5">

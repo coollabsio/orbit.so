@@ -1,0 +1,213 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Icon from "../components/Icon.astro";
+import { cloud, github } from "../data/links.js";
+import { price, trial } from "../data/pricing.js";
+import Check from "reicon/icons/Check";
+import Cloud from "reicon/icons/Cloud";
+import ChevronDown from "reicon/icons/ChevronDown";
+import HardDrive from "reicon/icons/HardDrive";
+
+// `true` renders a check mark.
+const selfHosted = [
+  "Every feature, no limits",
+  "Your server, your data",
+  "SQLite or Postgres, one binary",
+  "Unlimited workspaces and members",
+  "Community support on Discord",
+  "All new features included",
+];
+
+const cloudPoints = [
+  "Every feature of the self-hosted version",
+  "Unlimited members in the workspace",
+  "Hosting, backups and updates done by us",
+  "Email for invitations and sign-in included",
+  "Export your whole workspace at any time",
+  "Community and email support",
+];
+
+const rows = [
+  ["Tasks, docs and chat", true, true],
+  ["MCP server for AI clients", true, true],
+  ["Live co-editing", true, true],
+  ["Workspace export", true, true],
+  ["Codebase", "Open source", "Open source"],
+  ["Hosting", "You run it", "We run it"],
+  ["Dashboard address", "Your own domain", "app.orbit.so"],
+  ["Setup", "Manual", "Sign up and start"],
+  ["Backups", "You set them up", "Done by us"],
+  ["Updates", "You install them", "Done by us"],
+  ["Email server", "You add your own", true],
+  ["Members", "Unlimited", "Unlimited"],
+  ["Workspaces", "Unlimited", "One subscription each"],
+  ["Price", "Free forever", `$${price.monthly} per workspace each month`],
+];
+
+const faq = [
+  {
+    q: "Is there a trial?",
+    a: `Yes. A new workspace is free for ${trial.days} days, with no card. During the trial it holds up to ${trial.tasks} tasks, ${trial.pages} pages and ${trial.members} members. Subscribe at any time to remove the limits.`,
+  },
+  {
+    q: "What do I pay for?",
+    a: `One flat price for each workspace: $${price.monthly} each month, or $${price.annual} each year (two months free). The number of members does not change the price. Sales tax or VAT is added at checkout where it applies.`,
+  },
+  {
+    q: "Do I get Cloud-only features?",
+    a: "No. Orbit Cloud runs the same open-source code that you can host yourself. You pay for us to run it, back it up and update it.",
+  },
+  {
+    q: "What happens if I cancel my subscription?",
+    a: "The workspace becomes read-only at the end of the paid period. Members can still read and search everything, and owners and admins can export the whole workspace. Subscribe again to write again.",
+  },
+  {
+    q: "What if I miss a payment?",
+    a: "Stripe tries the card again for some days. During that time the workspace keeps full access. If the payment does not go through, the subscription ends and the workspace becomes read-only until you subscribe again.",
+  },
+  {
+    q: "Am I locked into Orbit Cloud?",
+    a: "No. You can export the whole workspace as a ZIP file with JSON, Markdown and all files at any time, also when it is read-only.",
+  },
+  {
+    q: "Is my data backed up?",
+    a: "Yes. We back up Orbit Cloud automatically and keep the files in object storage.",
+  },
+  {
+    q: "Can I use my own domain?",
+    a: "Not on Orbit Cloud. Host Orbit yourself to use your own domain.",
+  },
+  {
+    q: "Is the self-hosted version really free?",
+    a: "Yes. Orbit is open source under Apache 2.0, with every feature and no limits. You only pay for your own server.",
+  },
+];
+---
+
+<Layout
+  title="Pricing - Orbit"
+  description={`Orbit is free forever when you host it yourself. Orbit Cloud costs $${price.monthly} per workspace each month, with unlimited members and a ${trial.days}-day free trial.`}
+>
+  <section class="px-4">
+    <h1 class="text-4xl font-semibold tracking-tight text-fg md:text-6xl">Pricing<span class="text-orbit">.</span></h1>
+    <p class="mx-auto mt-5 max-w-xl text-base text-pretty text-fg-dim md:text-lg">
+      Host Orbit yourself for free, or let us run it for you.
+    </p>
+
+    <div class="mx-auto mt-12 grid max-w-4xl gap-4 text-left md:grid-cols-2">
+      <div class="card flex flex-col p-6">
+        <div class="flex items-center gap-3">
+          <div class="flex size-9 items-center justify-center rounded-md bg-white/[0.06] ring-1 ring-hairline">
+            <Icon icon={HardDrive} class="size-4 text-fg-dim" />
+          </div>
+          <h2 class="text-base font-medium text-fg">Self-hosted</h2>
+        </div>
+        <p class="mt-5 text-3xl font-semibold tracking-tight text-fg">Free forever</p>
+        <p class="mt-2 text-[13px] leading-5 text-fg-faint">Run Orbit on your own server, with no feature limits.</p>
+        <ul class="mt-6 flex-1 space-y-2.5 text-sm text-fg-dim">
+          {selfHosted.map((point) => (
+            <li class="flex gap-2"><Icon icon={Check} class="mt-0.5 size-4 shrink-0 text-fg-faint" />{point}</li>
+          ))}
+        </ul>
+        <a href={github} class="btn btn-neutral btn-lg mt-8 w-full"><Icon icon={HardDrive} class="size-4" />Start self-hosting</a>
+      </div>
+
+      <div class="card flex flex-col p-6 ring-orbit/50!">
+        <div class="flex items-center gap-3">
+          <div class="flex size-9 items-center justify-center rounded-md bg-orbit/15 ring-1 ring-orbit/40">
+            <Icon icon={Cloud} class="size-4 text-orbit-light" />
+          </div>
+          <h2 class="text-base font-medium text-fg">Orbit Cloud</h2>
+          <div class="ml-auto flex rounded-md bg-white/[0.04] p-0.5 text-xs ring-1 ring-hairline" role="group" aria-label="Billing period">
+            <button type="button" data-period="monthly" aria-pressed="true" class="period rounded px-2 py-1">Monthly</button>
+            <button type="button" data-period="annual" aria-pressed="false" class="period rounded px-2 py-1">Annually</button>
+          </div>
+        </div>
+        <p class="mt-5 text-3xl font-semibold tracking-tight text-fg">
+          <span data-show="monthly">${price.monthly}</span><span data-show="annual" hidden>${price.annual}</span>{" "}
+          <span class="text-sm font-normal text-fg-faint">
+            per workspace / <span data-show="monthly">month</span><span data-show="annual" hidden>year</span>
+          </span>
+        </p>
+        <p class="mt-2 text-[13px] leading-5 text-fg-faint">
+          <span data-show="monthly">Or ${price.annual} each year: two months free.</span>
+          <span data-show="annual" hidden>Two months free compared with monthly.</span>{" "}
+          {trial.days}-day free trial, no card needed.
+        </p>
+        <ul class="mt-6 flex-1 space-y-2.5 text-sm text-fg-dim">
+          {cloudPoints.map((point) => (
+            <li class="flex gap-2"><Icon icon={Check} class="mt-0.5 size-4 shrink-0 text-orbit-light" />{point}</li>
+          ))}
+        </ul>
+        <a href={`${cloud}/register`} class="btn btn-primary btn-lg mt-8 w-full"><Icon icon={Cloud} class="size-4" />Start your free trial</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto mt-20 max-w-4xl px-4">
+    <p class="eyebrow">Compare</p>
+    <h2 class="mt-2 text-2xl font-semibold tracking-tight text-fg md:text-3xl">Self-hosted vs Cloud</h2>
+    <div class="card mt-8 overflow-x-auto text-left">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-hairline text-xs text-fg-faint">
+            <th class="w-1/2 px-4 py-3 font-medium">Feature</th>
+            <th class="min-w-[120px] px-4 py-3 font-medium whitespace-nowrap">Self-hosted</th>
+            <th class="min-w-[80px] px-4 py-3 font-medium whitespace-nowrap">Cloud</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-hairline">
+          {rows.map(([feature, ...plans]) => (
+            <tr>
+              <td class="px-4 py-3 text-fg">{feature}</td>
+              {plans.map((value) => (
+                <td class="px-4 py-3 text-fg-dim">
+                  {value === true ? <Icon icon={Check} class="size-4 text-orbit-light" aria-label="Included" /> : value}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="mx-auto mt-20 max-w-3xl px-4">
+    <p class="eyebrow">FAQ</p>
+    <h2 class="mt-2 text-2xl font-semibold tracking-tight text-fg md:text-3xl">Frequently asked questions</h2>
+    <div class="card mt-8 divide-y divide-hairline text-left">
+      {faq.map((item) => (
+        <details class="group" name="faq">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-3 text-sm font-medium text-fg transition-colors hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden">
+            {item.q}
+            <Icon icon={ChevronDown} class="size-4 flex-none text-fg-faint transition-transform group-open:rotate-180" />
+          </summary>
+          <p class="px-4 pb-4 text-sm leading-6 text-fg-dim">{item.a}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  <style>
+    .period[aria-pressed="true"] {
+      background: rgb(255 255 255 / 0.09);
+      color: var(--color-fg);
+    }
+    .period[aria-pressed="false"] {
+      color: var(--color-fg-faint);
+    }
+  </style>
+
+  <script>
+    const buttons = document.querySelectorAll<HTMLButtonElement>("button[data-period]");
+    buttons.forEach((button) =>
+      button.addEventListener("click", () => {
+        const period = button.dataset.period;
+        buttons.forEach((other) => other.setAttribute("aria-pressed", String(other === button)));
+        document.querySelectorAll<HTMLElement>("[data-show]").forEach((element) => {
+          element.hidden = element.dataset.show !== period;
+        });
+      }),
+    );
+  </script>
+</Layout>
