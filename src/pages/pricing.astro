@@ -27,6 +27,8 @@ const cloudPoints = [
   "Community and email support",
 ];
 
+const annualSaving = Math.round((1 - price.annual / (price.monthly * 12)) * 100);
+
 const rows = [
   ["Tasks, docs and chat", true, true],
   ["MCP server for AI clients", true, true],
@@ -72,6 +74,10 @@ const faq = [
   {
     q: "Is my data backed up?",
     a: "Yes. We back up Orbit Cloud automatically and keep the files in object storage.",
+  },
+  {
+    q: "Is there a mobile app?",
+    a: "Not yet. An iOS and Android app is coming soon, for Orbit Cloud and for your own server.",
   },
   {
     q: "Can I use my own domain?",
@@ -120,7 +126,7 @@ const faq = [
           <h2 class="text-base font-medium text-fg">Orbit Cloud</h2>
           <div class="ml-auto flex rounded-md bg-white/[0.04] p-0.5 text-xs ring-1 ring-hairline" role="group" aria-label="Billing period">
             <button type="button" data-period="monthly" aria-pressed="true" class="period rounded px-2 py-1">Monthly</button>
-            <button type="button" data-period="annual" aria-pressed="false" class="period rounded px-2 py-1">Annually</button>
+            <button type="button" data-period="annual" aria-pressed="false" class="period rounded px-2 py-1">Annually <span class="text-orbit-light">-{annualSaving}%</span></button>
           </div>
         </div>
         <p class="mt-5 text-3xl font-semibold tracking-tight text-fg">
@@ -130,8 +136,8 @@ const faq = [
           </span>
         </p>
         <p class="mt-2 text-[13px] leading-5 text-fg-faint">
-          <span data-show="monthly">Or ${price.annual} each year: two months free.</span>
-          <span data-show="annual" hidden>Two months free compared with monthly.</span>{" "}
+          <span data-show="monthly">Or ${price.annual} each year: save {annualSaving}%.</span>
+          <span data-show="annual" hidden>{annualSaving}% less than paying monthly.</span>{" "}
           {trial.days}-day free trial, no card needed.
         </p>
         <ul class="mt-6 flex-1 space-y-2.5 text-sm text-fg-dim">
