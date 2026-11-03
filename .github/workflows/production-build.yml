@@ -56,8 +56,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    env:
-      COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK }}
     steps:
       - uses: docker/setup-buildx-action@v3
 
@@ -75,7 +73,12 @@ jobs:
             ${{ env.GITHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:latest-aarch64 \
             --tag ${{ env.GITHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
-      - name: Deploy to Coolify
-        if: env.COOLIFY_WEBHOOK != ''
+      - name: Deploy to Coolify Cloud
+        env:
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK }}
         run: |
-          curl --fail --request POST "$COOLIFY_WEBHOOK" --header 'Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}'
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer $COOLIFY_TOKEN" \
+            "$COOLIFY_WEBHOOK"
