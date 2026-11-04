@@ -12,6 +12,9 @@ const {
   title,
   description = "Orbit is a workspace for teams. Tasks, docs and chat in one app, on Orbit Cloud or on your own server. Mail is coming soon.",
 } = Astro.props;
+
+const ogImage = new URL("/og-image.png", Astro.site).href;
+const ogImageAlt = "Orbit: your team's work, in one orbit. Tasks, docs and chat in one workspace.";
 ---
 
 <!doctype html>
@@ -24,15 +27,21 @@ const {
     <meta name="theme-color" content="#0a0a0a" />
     <script is:inline defer data-domain="orbit.so" src="https://analytics.coollabs.io/js/script.js"></script>
     <meta name="description" content={description} />
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@heyandras" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={new URL(Astro.url.pathname.replace(/(index)?\.html$/, ""), Astro.site).href} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:site_name" content="Orbit" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="2400" />
+    <meta property="og:image:height" content="1260" />
+    <meta property="og:image:alt" content={ogImageAlt} />
     <title>{title}</title>
     <link rel="sitemap" href="/sitemap-index.xml" />
   </head>
