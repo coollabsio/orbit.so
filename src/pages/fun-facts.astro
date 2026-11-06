@@ -1,0 +1,89 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+// All amounts in USD. The domain is paid in equal monthly parts.
+const costs = {
+  start: "2026-10-01T00:00:00Z",
+  domain: 8000,
+  domainMonths: 24,
+  server: 15,
+  mrr: 10,
+};
+
+const domainMonthly = costs.domain / costs.domainMonths;
+const monthly = domainMonthly + costs.server;
+const usd = (value: number, digits = 2) =>
+  value.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: digits, maximumFractionDigits: digits });
+
+const facts = [
+  { label: "Monthly burn", value: usd(monthly), note: `${usd(domainMonthly)} domain + ${usd(costs.server)} server` },
+  { label: "Domain share of the bill", value: `${Math.round((domainMonthly / monthly) * 100)}%`, note: "The server is the cheap part" },
+  { label: "Server time the domain could buy", value: `${Math.round(costs.domain / costs.server)} months`, note: `That is ${Math.round(costs.domain / costs.server / 12)} years` },
+  { label: "MRR", value: usd(costs.mrr, 0), note: `Covers ${Math.round((costs.mrr / costs.server) * 100)}% of the server. Not the domain.` },
+  { label: "Profit margin", value: `${Math.round(((costs.mrr - monthly) / costs.mrr) * 100).toLocaleString("en-US")}%`, note: "Up from -∞%" },
+  { label: "Domain paid back by MRR in", value: `${Math.round(costs.domain / costs.mrr / 12)} years`, note: "We are patient people" },
+];
+---
+
+<Layout title="Fun facts - Orbit" description="How much Orbit costs us, live. Spoiler: MRR is $10.">
+  <section class="px-4" data-costs={JSON.stringify(costs)}>
+    <h1 class="text-4xl font-semibold tracking-tight text-fg md:text-6xl">Fun facts<span class="text-orbit">.</span></h1>
+    <p class="mx-auto mt-5 max-w-xl text-base text-pretty text-fg-dim md:text-lg">
+      What Orbit costs us since October 2026, live. The domain was {usd(costs.domain, 0)}, paid over {costs.domainMonths} months.
+    </p>
+
+    <div class="card mx-auto mt-12 max-w-2xl p-8">
+      <p class="eyebrow">Spent so far</p>
+      <p class="mt-3 text-4xl font-semibold tracking-tight text-fg tabular-nums md:text-6xl" data-spent>$0</p>
+      <p class="mt-3 text-sm text-fg-faint">
+        +<span class="tabular-nums" data-per-hour>$0.00</span> each hour. MRR: <span class="text-orbit-light">{usd(costs.mrr, 0)}</span>.
+      </p>
+      <div class="mt-6 h-2 overflow-hidden rounded-full bg-white/[0.06]">
+        <div class="h-full rounded-full bg-orbit" style="width: 0%" data-progress></div>
+      </div>
+      <p class="mt-2 text-xs text-fg-faint"><span data-paid>$0</span> of the domain paid. <span data-left>24</span> months to go.</p>
+    </div>
+
+    <div class="mx-auto mt-4 grid max-w-4xl gap-4 text-left sm:grid-cols-2 lg:grid-cols-3">
+      {facts.map((fact) => (
+        <div class="card p-5">
+          <p class="text-xs text-fg-faint">{fact.label}</p>
+          <p class="mt-2 text-2xl font-semibold tracking-tight text-fg tabular-nums">{fact.value}</p>
+          <p class="mt-1 text-[13px] text-fg-dim">{fact.note}</p>
+        </div>
+      ))}
+    </div>
+
+    <p class="mx-auto mt-10 max-w-xl text-sm text-fg-faint">
+      Want to help? <a href="/pricing" class="text-orbit-light hover:underline">Try Orbit Cloud</a> and make the MRR line less funny.
+    </p>
+  </section>
+
+  <script>
+    const root = document.querySelector<HTMLElement>("[data-costs]")!;
+    const costs = JSON.parse(root.dataset.costs!);
+    const start = new Date(costs.start).getTime();
+    const month = (365.25 / 12) * 24 * 60 * 60 * 1000;
+    const domainEnd = start + costs.domainMonths * month;
+    const domainPerMs = costs.domain / (costs.domainMonths * month);
+    const serverPerMs = costs.server / month;
+    const usd = (value: number, digits = 2) =>
+      value.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: digits, maximumFractionDigits: digits });
+    const set = (name: string, text: string) => (root.querySelector(`[data-${name}]`)!.textContent = text);
+
+    function tick() {
+      const now = Date.now();
+      const elapsed = Math.max(0, now - start);
+      const domainPaid = Math.min(elapsed, costs.domainMonths * month) * domainPerMs;
+      const perHour = ((now < domainEnd ? domainPerMs : 0) + serverPerMs) * 60 * 60 * 1000;
+      set("spent", usd(Math.ceil(domainPaid + elapsed * serverPerMs), 0));
+      set("per-hour", usd(perHour));
+      set("paid", usd(domainPaid, 0));
+      set("left", String(Math.max(0, Math.ceil((domainEnd - now) / month))));
+      root.querySelector<HTMLElement>("[data-progress]")!.style.width = `${(domainPaid / costs.domain) * 100}%`;
+    }
+
+    tick();
+    setInterval(tick, 1000);
+  </script>
+</Layout>
