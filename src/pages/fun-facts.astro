@@ -10,6 +10,7 @@ const costs = {
   domainMonths: 24,
   server: serverEur * 1.12,
   mrr: 10,
+  mrrStart: "2026-11-01T00:00:00Z",
 };
 
 const domainMonthly = costs.domain / costs.domainMonths;
@@ -35,10 +36,10 @@ const facts = [
     </p>
 
     <div class="card mx-auto mt-12 max-w-2xl p-8">
-      <p class="eyebrow">Spent so far</p>
-      <p class="mt-3 text-4xl font-semibold tracking-tight text-fg tabular-nums md:text-6xl" data-spent>$0</p>
+      <p class="eyebrow">How far in the red we are</p>
+      <p class="mt-3 text-4xl font-semibold tracking-tight text-fg tabular-nums md:text-6xl" data-net>-$0</p>
       <p class="mt-3 text-sm text-fg-faint">
-        +<span class="tabular-nums" data-per-hour>$0.00</span> each hour. MRR: <span class="text-orbit-light">{usd(costs.mrr, 0)}</span>.
+        <span class="tabular-nums" data-spent>$0</span> spent, <span class="tabular-nums" data-earned>$0</span> earned. -<span class="tabular-nums" data-per-hour>$0.00</span> each hour. MRR: <span class="text-orbit-light">{usd(costs.mrr, 0)}</span>.
       </p>
       <div class="mt-6 h-2 overflow-hidden rounded-full bg-white/[0.06]">
         <div class="h-full rounded-full bg-orbit" style="width: 0%" data-progress></div>
@@ -69,6 +70,8 @@ const facts = [
     const domainEnd = start + costs.domainMonths * month;
     const domainPerMs = costs.domain / (costs.domainMonths * month);
     const serverPerMs = costs.server / month;
+    const mrrStart = new Date(costs.mrrStart).getTime();
+    const mrrPerMs = costs.mrr / month;
     const usd = (value: number, digits = 2) =>
       value.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: digits, maximumFractionDigits: digits });
     const set = (name: string, text: string) => (root.querySelector(`[data-${name}]`)!.textContent = text);
@@ -77,8 +80,12 @@ const facts = [
       const now = Date.now();
       const elapsed = Math.max(0, now - start);
       const domainPaid = Math.min(elapsed, costs.domainMonths * month) * domainPerMs;
-      const perHour = ((now < domainEnd ? domainPerMs : 0) + serverPerMs) * 60 * 60 * 1000;
-      set("spent", usd(Math.ceil(domainPaid + elapsed * serverPerMs), 0));
+      const spent = domainPaid + elapsed * serverPerMs;
+      const earned = Math.max(0, now - mrrStart) * mrrPerMs;
+      const perHour = ((now < domainEnd ? domainPerMs : 0) + serverPerMs - (now >= mrrStart ? mrrPerMs : 0)) * 60 * 60 * 1000;
+      set("net", `-${usd(Math.ceil(spent - earned), 0)}`);
+      set("spent", usd(spent, 0));
+      set("earned", usd(earned, 0));
       set("per-hour", usd(perHour));
       set("paid", usd(domainPaid, 0));
       set("left", String(Math.max(0, Math.ceil((domainEnd - now) / month))));
