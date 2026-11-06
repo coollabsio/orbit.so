@@ -2,11 +2,13 @@
 import Layout from "../layouts/Layout.astro";
 
 // All amounts in USD. The domain is paid in equal monthly parts.
+// The server is billed in EUR; 1.12 is the approximate EUR/USD rate (Oct 2026).
+const serverEur = 10.49;
 const costs = {
   start: "2026-10-01T00:00:00Z",
   domain: 8000,
   domainMonths: 24,
-  server: 15,
+  server: serverEur * 1.12,
   mrr: 10,
 };
 
@@ -16,7 +18,7 @@ const usd = (value: number, digits = 2) =>
   value.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: digits, maximumFractionDigits: digits });
 
 const facts = [
-  { label: "Monthly burn", value: usd(monthly), note: `${usd(domainMonthly)} domain + ${usd(costs.server)} server` },
+  { label: "Monthly burn", value: usd(monthly), note: `${usd(domainMonthly)} domain + ${usd(costs.server)} server (€${serverEur})` },
   { label: "Domain share of the bill", value: `${Math.round((domainMonthly / monthly) * 100)}%`, note: "The server is the cheap part" },
   { label: "Server time the domain could buy", value: `${Math.round(costs.domain / costs.server)} months`, note: `That is ${Math.round(costs.domain / costs.server / 12)} years` },
   { label: "MRR", value: usd(costs.mrr, 0), note: `Covers ${Math.round((costs.mrr / costs.server) * 100)}% of the server. Not the domain.` },
