@@ -1,0 +1,19 @@
+# Orbit by coolLabs
+
+Orbit is an open-source workspace for teams: tasks, docs and chat in one app. Self-host free, or Orbit Cloud at $10 per workspace each month with unlimited members.
+
+## Product
+- [Orbit](https://orbit.so/)
+- [Pricing](https://orbit.so/pricing)
+
+## Buyer guides
+- [Linear, Notion and Slack alternative](https://orbit.so/linear-notion-slack-alternative)
+- [Flat-price team workspace](https://orbit.so/flat-price-team-workspace)
+- [Self-hosted workspace with MCP](https://orbit.so/self-hosted-workspace-mcp)
+- [Huly alternative](https://orbit.so/huly-alternative)
+
+## Documentation
+- [Source code and install](https://github.com/coollabsio/orbit)
+- [Deployment and operations](https://github.com/coollabsio/orbit/blob/main/docs/operations.md)
+- [MCP server and client setup](https://github.com/coollabsio/orbit/blob/main/docs/mcp.md)
+- [GitHub integration](https://github.com/coollabsio/orbit/blob/main/docs/github.md)
