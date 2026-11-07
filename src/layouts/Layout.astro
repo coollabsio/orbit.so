@@ -13,6 +13,7 @@ const {
   description = "Orbit is a workspace for teams. Tasks, docs and chat in one app, on Orbit Cloud or on your own server. Mail is coming soon.",
 } = Astro.props;
 
+const canonical = new URL(Astro.url.pathname.replace(/(index)?\.html$/, "").replace(/\/$/, "") || "/", Astro.site).href;
 const ogImage = new URL("/og-image.png", Astro.site).href;
 const ogImageAlt = "Orbit: your team's work, in one orbit. The best parts of Linear, Notion, Slack and your inbox, grown into one workspace for your team.";
 ---
@@ -26,6 +27,8 @@ const ogImageAlt = "Orbit: your team's work, in one orbit. The best parts of Lin
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="theme-color" content="#0a0a0a" />
     <script is:inline defer data-domain="orbit.so" src="https://analytics.coollabs.io/js/script.js"></script>
+    <link rel="canonical" href={canonical} />
+    <slot name="head" />
     <meta name="description" content={description} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@heyandras" />
@@ -34,7 +37,7 @@ const ogImageAlt = "Orbit: your team's work, in one orbit. The best parts of Lin
     <meta name="twitter:image" content={ogImage} />
     <meta name="twitter:image:alt" content={ogImageAlt} />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={new URL(Astro.url.pathname.replace(/(index)?\.html$/, ""), Astro.site).href} />
+    <meta property="og:url" content={canonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:site_name" content="Orbit" />

@@ -94,6 +94,15 @@ const faq = [
   title="Pricing - Orbit"
   description={`Orbit is free forever when you host it yourself. Orbit Cloud costs $${price.monthly} per workspace each month, with unlimited members and a ${trial.days}-day free trial.`}
 >
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faq.filter(({ q }) => q !== "Is my data backed up?" && q !== "Do I get Cloud-only features?").map(({ q, a }) => ({
+      "@type": "Question",
+      name: q,
+      acceptedAnswer: { "@type": "Answer", text: a },
+    })),
+  }).replace(/</g, "\\u003c")} />
   <section class="px-4">
     <h1 class="text-4xl font-semibold tracking-tight text-fg md:text-6xl">Pricing<span class="text-orbit">.</span></h1>
     <p class="mx-auto mt-5 max-w-xl text-base text-pretty text-fg-dim md:text-lg">

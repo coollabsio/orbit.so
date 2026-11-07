@@ -1,0 +1,51 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { guides } from "../data/guides.js";
+import { github } from "../data/links.js";
+
+export function getStaticPaths() {
+  return guides.map((guide) => ({ params: { guide: guide.slug }, props: { guide } }));
+}
+
+const { guide } = Astro.props;
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: guide.faq.map(({ q, a }) => ({
+    "@type": "Question",
+    name: q,
+    acceptedAnswer: { "@type": "Answer", text: a },
+  })),
+};
+---
+
+<Layout title={`${guide.question} | Orbit by coolLabs`} description={guide.answer}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(faqSchema).replace(/</g, "\\u003c")} />
+  <article class="mx-auto max-w-3xl px-4 text-left">
+    <h1 class="text-3xl font-semibold tracking-tight text-fg md:text-5xl">{guide.question}</h1>
+    <p class="mt-6 text-base leading-7 text-fg-dim">{guide.answer}</p>
+    <p class="mt-6 flex flex-wrap gap-4 text-sm">
+      <a class="text-orbit-light underline" href="/pricing">See pricing</a>
+      <a class="text-orbit-light underline" href={`${github}/blob/main/docs/operations.md`}>Self-hosting guide</a>
+      <a class="text-orbit-light underline" href={`${github}/blob/main/docs/mcp.md`}>MCP setup</a>
+      <a class="text-orbit-light underline" href={`${github}/blob/main/docs/github.md`}>GitHub integration</a>
+    </p>
+    <section class="mt-10" aria-label="Frequently asked questions">
+      <h2 class="text-xl font-semibold text-fg">Frequently asked questions</h2>
+      {guide.faq.map(({ q, a }) => (
+        <div class="mt-5">
+          <h3 class="font-medium text-fg">{q}</h3>
+          <p class="mt-1 text-sm leading-6 text-fg-dim">{a}</p>
+        </div>
+      ))}
+    </section>
+    <nav class="mt-10" aria-label="Related guides">
+      <h2 class="text-xl font-semibold text-fg">Related guides</h2>
+      <ul class="mt-3 space-y-2 text-sm">
+        {guides.filter(({ slug }) => slug !== guide.slug).map((related) => (
+          <li><a class="text-orbit-light underline" href={`/${related.slug}`}>{related.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+  </article>
+</Layout>
