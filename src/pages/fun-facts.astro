@@ -1,16 +1,29 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import FunChart from "../components/FunChart.astro";
+import { price } from "../data/pricing.js";
 
 // All amounts in USD. The domain is paid in equal monthly parts.
 // The server is billed in EUR; 1.12 is the approximate EUR/USD rate (Oct 2026).
 const serverEur = 10.49;
+
+// Stripe snapshots. To update the page, add one line at the end.
+// received = total gross volume so far, mrr = MRR on that day, note = what happened.
+const history = [
+  { date: "2026-10-01", mrr: 0, received: 0, note: "Bought orbit.so. Regret pending." },
+  { date: "2026-11-01", mrr: 10, received: 0, note: "First customer. No party. Party is not in the budget." },
+  { date: "2026-11-09", mrr: 48.33, received: 140, note: "Someone paid for a full year up front. Brave." },
+];
+const latest = history[history.length - 1];
+
 const costs = {
   start: "2026-10-01T00:00:00Z",
   domain: 7900,
   domainMonths: 24,
   server: serverEur * 1.12,
-  mrr: 10,
-  mrrStart: "2026-11-01T00:00:00Z",
+  received: latest.received,
+  mrr: latest.mrr,
+  mrrStart: `${latest.date}T00:00:00Z`,
 };
 
 const domainMonthly = costs.domain / costs.domainMonths;
@@ -18,17 +31,91 @@ const monthly = domainMonthly + costs.server;
 const usd = (value: number, digits = 2) =>
   value.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: digits, maximumFractionDigits: digits });
 
+const dayMs = 24 * 60 * 60 * 1000;
+const monthMs = (365.25 / 12) * dayMs;
+const previous = history[history.length - 2];
+const shortDate = (date: Date) => date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+const signed = (value: number, digits = 2) => `${value < 0 ? "-" : "+"}${usd(Math.abs(value), digits)}`;
+const margin = (mrr: number) => `${Math.round(((mrr - monthly) / mrr) * 100).toLocaleString("en-US")}%`;
+
+// Break-even date if MRR keeps growing as fast as between the last two snapshots.
+const growthPerDay = (latest.mrr - previous.mrr) / ((Date.parse(latest.date) - Date.parse(previous.date)) / dayMs);
+const breakEven = growthPerDay > 0 ? shortDate(new Date(Date.parse(latest.date) + ((monthly - latest.mrr) / growthPerDay) * dayMs)) : "Never";
+const workspacesNeeded = Math.ceil(monthly / price.monthly);
+const workspacesNow = Math.round(latest.mrr / price.monthly);
+const coffee = 4.5;
+
 const facts = [
   { label: "Monthly burn", value: usd(monthly), note: `${usd(domainMonthly)} domain + ${usd(costs.server)} server (€${serverEur})` },
-  { label: "Domain share of the bill", value: `${Math.round((domainMonthly / monthly) * 100)}%`, note: "The server is the cheap part" },
-  { label: "Server time the domain could buy", value: `${Math.round(costs.domain / costs.server)} months`, note: `That is ${Math.round(costs.domain / costs.server / 12)} years` },
-  { label: "MRR", value: usd(costs.mrr, 0), note: `Covers ${Math.round((costs.mrr / costs.server) * 100)}% of the server. Not the domain.` },
-  { label: "Profit margin", value: `${Math.round(((costs.mrr - monthly) / costs.mrr) * 100).toLocaleString("en-US")}%`, note: "Up from -∞%" },
+  { label: "Workspaces we need to break even", value: String(workspacesNeeded), note: `We have about ${workspacesNow}. Only ${workspacesNeeded - workspacesNow} to go. Easy.` },
+  { label: "Break-even, at this growth speed", value: breakEven, note: "If growth stays this fast. It will not." },
+  { label: "MRR", value: usd(costs.mrr), note: `Pays for the server ${(costs.mrr / costs.server).toFixed(1)}× over. The domain is not impressed.` },
+  { label: "Profit margin", value: margin(costs.mrr), note: `Up from ${margin(previous.mrr)} on ${shortDate(new Date(previous.date))}. Growth.` },
   { label: "Domain paid back by MRR in", value: `${Math.round(costs.domain / costs.mrr / 12)} years`, note: "We are patient people" },
+  { label: "Domain share of the bill", value: `${Math.round((domainMonthly / monthly) * 100)}%`, note: "The server does all the work. The domain gets all the money." },
+  { label: "Server time the domain could buy", value: `${Math.round(costs.domain / costs.server)} months`, note: `That is ${Math.round(costs.domain / costs.server / 12)} years. The server would outlive us.` },
+  { label: "Coffees MRR buys each month", value: String(Math.floor(costs.mrr / coffee)), note: `The domain is ${Math.round(costs.domain / coffee).toLocaleString("en-US")} coffees. We drink tea now.` },
+];
+
+const mood = (covered: number) =>
+  covered === 0 ? "Mood: denial."
+  : covered < 0.05 ? "Mood: ramen, no egg."
+  : covered < 0.25 ? "Mood: ramen, with egg."
+  : covered < 0.5 ? "Mood: we refresh Stripe every hour."
+  : covered < 1 ? "Mood: we can smell the profit."
+  : "Mood: champagne. The cheap one.";
+
+// One chart per tab. Each point is one snapshot from history.
+const views = [
+  {
+    key: "rich",
+    tab: "Are we rich yet?",
+    blurb: "MRR minus the monthly bill. Above the dashed line we buy champagne. Below it we buy store-brand pasta.",
+    tick: (v: number) => (v === 0 ? "$0" : signed(v, 0)),
+    refs: [{ value: 0, label: "Break-even" }],
+    points: history.map((p) => ({
+      date: p.date,
+      value: p.mrr - monthly,
+      label: signed(p.mrr - monthly),
+      lines: [`Per month. ${usd(p.mrr)} MRR vs a ${usd(monthly)} bill.`, mood(p.mrr / monthly), p.note],
+    })),
+  },
+  {
+    key: "covered",
+    tab: "Bill covered",
+    blurb: "How much of the monthly bill MRR pays. The top of the chart is 100%. Yes, it is that far away.",
+    tick: (v: number) => `${v}%`,
+    refs: [
+      { value: (costs.server / monthly) * 100, label: "Server paid" },
+      { value: 100, label: "Ramen profitable" },
+    ],
+    points: history.map((p) => ({
+      date: p.date,
+      value: (p.mrr / monthly) * 100,
+      label: `${((p.mrr / monthly) * 100).toFixed(1)}%`,
+      lines: [p.mrr >= costs.server ? "The server is paid. The domain still waits." : "Not even the server. Sorry, server.", mood(p.mrr / monthly), p.note],
+    })),
+  },
+  {
+    key: "hole",
+    tab: "The hole",
+    blurb: "All money out minus all money in, since day one. This line goes down. Down is the bad direction.",
+    tick: (v: number) => (v === 0 ? "$0" : signed(v, 0)),
+    refs: [],
+    points: history.map((p) => {
+      const spent = ((Date.parse(p.date) - Date.parse(costs.start)) / monthMs) * monthly;
+      return {
+        date: p.date,
+        value: p.received - spent,
+        label: signed(p.received - spent, 0),
+        lines: [`${usd(spent, 0)} out, ${usd(p.received, 0)} in.`, p.note],
+      };
+    }),
+  },
 ];
 ---
 
-<Layout title="Fun facts - Orbit" description="How much Orbit costs us, live. Spoiler: MRR is $10.">
+<Layout title="Fun facts - Orbit" description="How much Orbit costs us, live. Spoiler: MRR is $48.">
   <section class="px-4" data-costs={JSON.stringify(costs)}>
     <h1 class="text-4xl font-semibold tracking-tight text-fg md:text-6xl">Fun facts<span class="text-orbit">.</span></h1>
     <p class="mx-auto mt-5 max-w-xl text-base text-pretty text-fg-dim md:text-lg">
@@ -39,7 +126,7 @@ const facts = [
       <p class="eyebrow">How far in the red we are</p>
       <p class="mt-3 text-4xl font-semibold tracking-tight text-fg tabular-nums md:text-6xl" data-net>-$0</p>
       <p class="mt-3 text-sm text-fg-faint">
-        <span class="tabular-nums" data-spent>$0</span> spent, <span class="tabular-nums" data-earned>$0</span> earned. -<span class="tabular-nums" data-per-hour>$0.00</span> each hour. MRR: <span class="text-orbit-light">{usd(costs.mrr, 0)}</span>.
+        <span class="tabular-nums" data-spent>$0</span> spent, <span class="tabular-nums" data-earned>$0</span> earned. -<span class="tabular-nums" data-per-hour>$0.00</span> each hour. MRR: <span class="text-orbit-light">{usd(costs.mrr)}</span>.
       </p>
       <div class="mt-6 h-2 overflow-hidden rounded-full bg-white/[0.06]">
         <div class="h-full rounded-full bg-orbit" style="width: 0%" data-progress></div>
@@ -54,6 +141,20 @@ const facts = [
           <p class="mt-2 text-2xl font-semibold tracking-tight text-fg tabular-nums">{fact.value}</p>
           <p class="mt-1 text-[13px] text-fg-dim">{fact.note}</p>
         </div>
+      ))}
+    </div>
+
+    <div class="card mx-auto mt-4 max-w-4xl p-6 text-left">
+      <div class="flex flex-wrap gap-1" role="group" aria-label="Chart view">
+        {views.map((view, i) => (
+          <button type="button" class="rounded-md px-3 py-1.5 text-sm text-fg-dim transition-colors hover:text-fg aria-pressed:bg-white/[0.08] aria-pressed:text-fg" aria-pressed={i === 0 ? "true" : "false"} data-tab={view.key}>{view.tab}</button>
+        ))}
+      </div>
+      {views.map((view, i) => (
+        <>
+          <p class="mt-4 text-[13px] text-fg-dim" data-panel={view.key} hidden={i !== 0}>{view.blurb} Hover the points for the gossip.</p>
+          <FunChart points={view.points} tick={view.tick} refs={view.refs} panel={view.key} hidden={i !== 0} ariaLabel={`${view.tab}: ${view.points[0].label} to ${view.points[view.points.length - 1].label}`} />
+        </>
       ))}
     </div>
 
@@ -81,7 +182,7 @@ const facts = [
       const elapsed = Math.max(0, now - start);
       const domainPaid = Math.min(elapsed, costs.domainMonths * month) * domainPerMs;
       const spent = domainPaid + elapsed * serverPerMs;
-      const earned = Math.max(0, now - mrrStart) * mrrPerMs;
+      const earned = costs.received + Math.max(0, now - mrrStart) * mrrPerMs;
       const perHour = ((now < domainEnd ? domainPerMs : 0) + serverPerMs - (now >= mrrStart ? mrrPerMs : 0)) * 60 * 60 * 1000;
       set("net", `-${usd(Math.ceil(spent - earned), 0)}`);
       set("spent", usd(spent, 0));
@@ -94,5 +195,14 @@ const facts = [
 
     tick();
     setInterval(tick, 1000);
+
+    // Chart tabs: show one view at a time.
+    const tabs = document.querySelectorAll<HTMLButtonElement>("[data-tab]");
+    for (const tab of tabs) {
+      tab.addEventListener("click", () => {
+        for (const other of tabs) other.setAttribute("aria-pressed", String(other === tab));
+        for (const panel of document.querySelectorAll<HTMLElement>("[data-panel]")) panel.hidden = panel.dataset.panel !== tab.dataset.tab;
+      });
+    }
   </script>
 </Layout>

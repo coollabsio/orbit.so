@@ -1,0 +1,109 @@
+---
+// Single-series line chart with hover. All labels are pre-formatted by the caller.
+interface Point {
+  date: string;
+  value: number;
+  label: string;
+  lines: string[];
+}
+interface Props {
+  points: Point[];
+  tick: (value: number) => string;
+  refs?: { value: number; label: string }[];
+  hidden?: boolean;
+  panel: string;
+  ariaLabel: string;
+}
+
+const { points, tick, refs = [], hidden = false, panel, ariaLabel } = Astro.props;
+
+const chart = { w: 640, h: 240, left: 56, right: 96, top: 16, bottom: 28 };
+const values = [0, ...points.map((p) => p.value), ...refs.map((r) => r.value)];
+const rough = (Math.max(...values) - Math.min(...values)) / 4 || 1;
+const pow = 10 ** Math.floor(Math.log10(rough));
+const step = [1, 2, 2.5, 5, 10].map((m) => m * pow).find((s) => s >= rough)!;
+const yMin = Math.floor(Math.min(...values) / step) * step;
+const yMax = Math.ceil(Math.max(...values) / step) * step;
+const ticks = Array.from({ length: Math.round((yMax - yMin) / step) + 1 }, (_, i) => yMin + i * step);
+
+const t0 = Date.parse(points[0].date);
+const t1 = Date.parse(points[points.length - 1].date);
+const x = (date: string) => chart.left + ((Date.parse(date) - t0) / (t1 - t0 || 1)) * (chart.w - chart.left - chart.right);
+const y = (value: number) => chart.top + ((yMax - value) / (yMax - yMin)) * (chart.h - chart.top - chart.bottom);
+const shortDate = (date: string) => new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+const placed = points.map((p) => ({ ...p, x: x(p.date), y: y(p.value), day: shortDate(p.date) }));
+const last = placed[placed.length - 1];
+---
+
+<div class="relative mt-4" data-chart={JSON.stringify(placed)} data-panel={panel} hidden={hidden}>
+  <svg viewBox={`0 0 ${chart.w} ${chart.h}`} class="w-full touch-none" role="img" aria-label={ariaLabel}>
+    {ticks.map((t) => (
+      <g>
+        <line x1={chart.left} x2={chart.w - chart.right} y1={y(t)} y2={y(t)} stroke="var(--color-hairline)" />
+        <text x={chart.left - 8} y={y(t)} dy="0.32em" text-anchor="end" class="fill-fg-faint text-[11px] tabular-nums">{tick(t)}</text>
+      </g>
+    ))}
+    {refs.map((r) => (
+      <g>
+        <line x1={chart.left} x2={chart.w - chart.right} y1={y(r.value)} y2={y(r.value)} stroke="var(--color-fg-faint)" stroke-dasharray="4 4" />
+        <text x={chart.w - chart.right + 8} y={y(r.value)} dy="0.32em" class="fill-fg-dim text-[11px]">{r.label}</text>
+      </g>
+    ))}
+    <polyline points={placed.map((p) => `${p.x},${p.y}`).join(" ")} fill="none" stroke="var(--color-orbit)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+    {placed.map((p) => <circle cx={p.x} cy={p.y} r="4" fill="var(--color-orbit)" stroke="var(--color-panel)" stroke-width="2" />)}
+    <text x={last.x + 10} y={last.y} dy="0.32em" class="fill-fg text-[12px] font-semibold tabular-nums">{last.label}</text>
+    {placed.map((p) => <text x={p.x} y={chart.h - 8} text-anchor="middle" class="fill-fg-faint text-[11px]">{p.day}</text>)}
+    <line y1={chart.top} y2={chart.h - chart.bottom} stroke="var(--color-fg-faint)" visibility="hidden" data-cross />
+    <circle r="6" fill="var(--color-orbit)" stroke="var(--color-fg)" stroke-width="2" visibility="hidden" data-dot />
+    <rect x={chart.left} y={chart.top} width={chart.w - chart.left - chart.right} height={chart.h - chart.top - chart.bottom} fill="transparent" data-hit />
+  </svg>
+  <div class="pointer-events-none absolute top-0 hidden w-56 rounded-md bg-raised px-3 py-2 text-xs shadow-lg ring-1 ring-hairline" data-tip></div>
+  <table class="sr-only">
+    <tbody>{placed.map((p) => <tr><td>{p.day}</td><td>{p.label}</td><td>{p.lines.join(" ")}</td></tr>)}</tbody>
+  </table>
+</div>
+
+<script>
+  type Placed = { x: number; y: number; day: string; label: string; lines: string[] };
+
+  // Hover snaps to the nearest snapshot by x.
+  for (const root of document.querySelectorAll<HTMLElement>("[data-chart]")) {
+    const points: Placed[] = JSON.parse(root.dataset.chart!);
+    const svg = root.querySelector("svg")!;
+    const cross = svg.querySelector("[data-cross]")!;
+    const dot = svg.querySelector("[data-dot]")!;
+    const tip = root.querySelector<HTMLElement>("[data-tip]")!;
+    const width = svg.viewBox.baseVal.width;
+    const hit = svg.querySelector("[data-hit]")!;
+
+    const show = (event: Event) => {
+      const box = svg.getBoundingClientRect();
+      const px = (((event as PointerEvent).clientX - box.left) / box.width) * width;
+      const p = points.reduce((a, b) => (Math.abs(b.x - px) < Math.abs(a.x - px) ? b : a));
+      cross.setAttribute("x1", String(p.x));
+      cross.setAttribute("x2", String(p.x));
+      dot.setAttribute("cx", String(p.x));
+      dot.setAttribute("cy", String(p.y));
+      cross.setAttribute("visibility", "visible");
+      dot.setAttribute("visibility", "visible");
+      tip.replaceChildren(
+        Object.assign(document.createElement("p"), { className: "text-fg-faint", textContent: p.day }),
+        Object.assign(document.createElement("p"), { className: "mt-0.5 text-sm font-semibold text-fg tabular-nums", textContent: p.label }),
+        ...p.lines.map((line) => Object.assign(document.createElement("p"), { className: "mt-1 text-fg-dim", textContent: line })),
+      );
+      // Keep the tip beside the point, on the side facing the chart center.
+      tip.style.left = `${(p.x / width) * 100}%`;
+      tip.style.transform = p.x > width / 2 ? "translateX(calc(-100% - 12px))" : "translateX(12px)";
+      tip.classList.remove("hidden");
+    };
+    const hide = () => {
+      cross.setAttribute("visibility", "hidden");
+      dot.setAttribute("visibility", "hidden");
+      tip.classList.add("hidden");
+    };
+
+    hit.addEventListener("pointermove", show);
+    hit.addEventListener("pointerdown", show);
+    hit.addEventListener("pointerleave", hide);
+  }
+</script>
