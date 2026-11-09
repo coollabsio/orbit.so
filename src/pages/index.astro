@@ -139,8 +139,8 @@ const features = [
   },
   {
     icon: Download,
-    title: "Import from Notion",
-    html: "Choose the pages to import. Orbit copies the pages and their files into a teamspace.",
+    title: "Import from Notion, Linear, Asana and Trello",
+    html: "Bring docs from Notion and tasks from Linear, Asana and Trello into Orbit.",
   },
   {
     wide: "full",
@@ -187,7 +187,22 @@ const features = [
 
 ---
 
-<Layout title="Orbit - Your team's work, in one orbit">
+<Layout title="Orbit by coolLabs: tasks, docs and chat in one open-source workspace">
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Orbit by coolLabs",
+    url: "https://orbit.so/",
+    description: "An open-source workspace for teams with tasks, docs and chat. Self-host free, or use Orbit Cloud with unlimited members.",
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Linux",
+    license: "https://www.apache.org/licenses/LICENSE-2.0",
+    sameAs: github,
+    offers: [
+      { "@type": "Offer", name: "Self-hosted", price: "0", priceCurrency: "USD", url: github },
+      { "@type": "Offer", name: "Orbit Cloud", price: String(price.monthly), priceCurrency: "USD", description: `$${price.monthly} per workspace each month with unlimited members`, url: "https://orbit.so/pricing", priceSpecification: { "@type": "UnitPriceSpecification", price: String(price.monthly), priceCurrency: "USD", unitText: "workspace per month", billingDuration: "P1M" } },
+    ],
+  }).replace(/</g, "\\u003c")} />
   <section class="px-4">
     <a
       href="https://coollabs.io/philosophy?ref=orbit"
