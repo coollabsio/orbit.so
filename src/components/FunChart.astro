@@ -52,7 +52,7 @@ const last = placed[placed.length - 1];
     <polyline points={placed.map((p) => `${p.x},${p.y}`).join(" ")} fill="none" stroke="var(--color-orbit)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
     {placed.map((p) => <circle cx={p.x} cy={p.y} r="4" fill="var(--color-orbit)" stroke="var(--color-panel)" stroke-width="2" />)}
     <text x={last.x + 10} y={last.y} dy="0.32em" class="fill-fg text-[12px] font-semibold tabular-nums">{last.label}</text>
-    {placed.map((p) => <text x={p.x} y={chart.h - 8} text-anchor="middle" class="fill-fg-faint text-[11px]">{p.day}</text>)}
+    {placed.filter((p, i) => i === placed.length - 1 || placed[i + 1].x - p.x > 44).map((p) => <text x={p.x} y={chart.h - 8} text-anchor="middle" class="fill-fg-faint text-[11px]">{p.day}</text>)}
     <line y1={chart.top} y2={chart.h - chart.bottom} stroke="var(--color-fg-faint)" visibility="hidden" data-cross />
     <circle r="6" fill="var(--color-orbit)" stroke="var(--color-fg)" stroke-width="2" visibility="hidden" data-dot />
     <rect x={chart.left} y={chart.top} width={chart.w - chart.left - chart.right} height={chart.h - chart.top - chart.bottom} fill="transparent" data-hit />
