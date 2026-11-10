@@ -11,6 +11,7 @@ routes = {
     "/": None,
     "/pricing": "Pricing.",
     "/fun-facts": None,
+    "/sponsorships": "Sponsor us.",
     "/linear-notion-slack-alternative": "Is there one open-source app that replaces Linear, Notion and Slack?",
     "/flat-price-team-workspace": "Is there a team workspace with a flat price, not per user?",
     "/self-hosted-workspace-mcp": "Which self-hosted workspace lets Claude read our tasks and docs?",
@@ -59,7 +60,7 @@ try:
             app = next(value for value in schemas if value["@type"] == "SoftwareApplication")
             assert app["offers"][1]["price"] == "10"
             assert app["license"] == "https://www.apache.org/licenses/LICENSE-2.0"
-        elif route != "/fun-facts":
+        elif route not in ("/fun-facts", "/sponsorships"):
             faq = next(value for value in schemas if value["@type"] == "FAQPage")
             assert len(faq["mainEntity"]) == (8 if route == "/pricing" else 2)
             visible = unescape(re.sub(r"<script.*?</script>|<[^>]*>", " ", body, flags=re.S))
@@ -78,13 +79,13 @@ try:
     status, headers, body = fetch("/llms.txt")
     assert status == 200 and headers.get_content_type() == "text/plain"
     assert body == (root / "public/llms.txt").read_text()
-    for route in list(routes)[3:]:
+    for route in list(routes)[4:]:
         assert "https://orbit.so" + route in body
     print("PASS /llms.txt 200 text/plain with all four guides")
 
     status, headers, body = fetch("/sitemap-0.xml")
     assert status == 200
-    for route in list(routes)[3:]:
+    for route in list(routes)[4:]:
         assert "https://orbit.so" + route in body
     assert "/404" not in body
     print("PASS sitemap includes all four guides and excludes 404")
