@@ -3,28 +3,29 @@ import Layout from "../layouts/Layout.astro";
 import FunChart from "../components/FunChart.astro";
 import { price } from "../data/pricing.js";
 
-// All amounts in USD. The server runs since October; the domain is paid in equal monthly parts since November.
+// All amounts in USD. The server runs since October; the domain is paid in equal monthly parts.
 // The server is billed in EUR; 1.12 is the approximate EUR/USD rate (Oct 2026).
 const serverEur = 10.49;
 
 // Stripe snapshots. To update the page, add one line at the end.
-// received = total gross volume so far, mrr = MRR on that day, note = what happened.
+// received = total gross volume so far, mrr = MRR on that day,
+// domainMonthsPaid = domain monthly parts paid so far, note = what happened.
 const history = [
-  { date: "2026-10-01", mrr: 0, received: 0, note: "Server on. No domain, no customers. Peace." },
-  { date: "2026-11-01", mrr: 10, received: 0, note: "Bought orbit.so. First customer too. No party. Party is not in the budget." },
-  { date: "2026-11-09", mrr: 48.33, received: 140, note: "Someone paid for a full year up front. Brave." },
-  { date: "2026-11-10", mrr: 66.66, received: 250, note: "Paid $329 for the domain. All income ever: $250. The domain wins again." },
-  { date: "2026-11-20", mrr: 126.66, received: 322.5, note: "MRR almost doubled in 10 days. We checked twice. It is real." },
+  { date: "2026-10-01", mrr: 0, received: 0, domainMonthsPaid: 0, note: "Server on. No domain, no customers. Peace." },
+  { date: "2026-11-01", mrr: 10, received: 0, domainMonthsPaid: 1, note: "Bought orbit.so. First customer too. No party. Party is not in the budget." },
+  { date: "2026-11-09", mrr: 48.33, received: 140, domainMonthsPaid: 1, note: "Someone paid for a full year up front. Brave." },
+  { date: "2026-11-10", mrr: 66.66, received: 250, domainMonthsPaid: 1, note: "Paid $329 for the domain. All income ever: $250. The domain wins again." },
+  { date: "2026-11-20", mrr: 126.66, received: 322.5, domainMonthsPaid: 2, note: "MRR almost doubled in 10 days. Then the domain took its second $329." },
 ];
 const latest = history[history.length - 1];
 
 const costs = {
   start: "2026-10-01T00:00:00Z",
-  domainStart: "2026-11-01T00:00:00Z",
   domain: 7900,
   domainMonths: 24,
   server: serverEur * 1.12,
   received: latest.received,
+  domainMonthsPaid: latest.domainMonthsPaid,
   mrr: latest.mrr,
   mrrStart: `${latest.date}T00:00:00Z`,
 };
@@ -106,8 +107,7 @@ const views = [
     tick: (v: number) => (v === 0 ? "$0" : signed(v, 0)),
     refs: [],
     points: history.map((p) => {
-      const months = (from: string) => Math.max(0, Date.parse(p.date) - Date.parse(from)) / monthMs;
-      const spent = months(costs.start) * costs.server + months(costs.domainStart) * domainMonthly;
+      const spent = ((Date.parse(p.date) - Date.parse(costs.start)) / monthMs) * costs.server + p.domainMonthsPaid * domainMonthly;
       return {
         date: p.date,
         value: p.received - spent,
@@ -172,9 +172,10 @@ const views = [
     const costs = JSON.parse(root.dataset.costs!);
     const start = new Date(costs.start).getTime();
     const month = (365.25 / 12) * 24 * 60 * 60 * 1000;
-    const domainStart = new Date(costs.domainStart).getTime();
-    const domainEnd = domainStart + costs.domainMonths * month;
-    const domainPerMs = costs.domain / (costs.domainMonths * month);
+    // The domain is paid in whole monthly parts; only the paid parts count as spent.
+    const domainMonthly = costs.domain / costs.domainMonths;
+    const domainPaid = costs.domainMonthsPaid * domainMonthly;
+    const domainLeft = costs.domainMonths - costs.domainMonthsPaid;
     const serverPerMs = costs.server / month;
     const mrrStart = new Date(costs.mrrStart).getTime();
     const mrrPerMs = costs.mrr / month;
@@ -185,10 +186,9 @@ const views = [
     function tick() {
       const now = Date.now();
       const elapsed = Math.max(0, now - start);
-      const domainPaid = Math.min(Math.max(0, now - domainStart), costs.domainMonths * month) * domainPerMs;
       const spent = domainPaid + elapsed * serverPerMs;
       const earned = costs.received + Math.max(0, now - mrrStart) * mrrPerMs;
-      const perHour = ((now >= domainStart && now < domainEnd ? domainPerMs : 0) + serverPerMs - (now >= mrrStart ? mrrPerMs : 0)) * 60 * 60 * 1000;
+      const perHour = ((domainLeft > 0 ? domainMonthly / month : 0) + serverPerMs - (now >= mrrStart ? mrrPerMs : 0)) * 60 * 60 * 1000;
       const net = Math.round(earned - spent);
       set("mood", net >= 0 ? "In the black. Do not tell the domain." : "How far in the red we are");
       set("net", `${net < 0 ? "-" : "+"}${usd(Math.abs(net), 0)}`);
@@ -196,7 +196,7 @@ const views = [
       set("earned", usd(earned, 0));
       set("per-hour", `${perHour > 0 ? "-" : "+"}${usd(Math.abs(perHour))}`);
       set("paid", usd(domainPaid, 0));
-      set("left", String(Math.max(0, Math.ceil((domainEnd - now) / month))));
+      set("left", String(domainLeft));
       root.querySelector<HTMLElement>("[data-progress]")!.style.width = `${(domainPaid / costs.domain) * 100}%`;
     }
 
